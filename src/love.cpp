@@ -233,7 +233,7 @@ static DoneAction runlove(int argc, char **argv, int &retval)
           lua_State *L = static_cast<lua_State *>(arg);
           int stackpos = lua_gettop(L);
           
-          if (lua_resume(L, 0) == LUA_YIELD) {
+          if (lua_resume(L, nullptr, 0) == LUA_YIELD) {
             lua_pop(L, lua_gettop(L) - stackpos);
           } else {
             emscripten_cancel_main_loop();

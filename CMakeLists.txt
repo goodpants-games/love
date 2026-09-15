@@ -157,7 +157,7 @@ if(MEGA)
 			${MEGA_LUAJIT_DLL}
 		)
 	else()
-		set(LOVE_LUA_LIBRARY ${MEGA_LUA51})
+		set(LOVE_LUA_LIBRARY ${MEGA_LUA52})
 
 		set(LOVE_LINK_LIBRARIES
 			${LOVE_LINK_LIBRARIES}
@@ -167,7 +167,7 @@ if(MEGA)
 			${LOVE_MOVE_DLLS}
 			${LOVE_LUA_LIBRARY}
 		)
-		# MEGA_LUA51 is a CMake target, so includes are handled
+		# MEGA_LUA52 is a CMake target, so includes are handled
 		# automatically.
 	endif()
 else()
@@ -209,7 +209,7 @@ Please see http://bitbucket.org/rude/megasource
 		${OPENAL_LIBRARY}
 		${MODPLUG_LIBRARY}
 		${THEORA_LIBRARY}
-		${THEORADEC_LIBRARY}
+		# ${THEORADEC_LIBRARY}
 		${VORBISFILE_LIBRARY}
 		${LOVE_LUA_LIBRARY}
 		${OGG_LIBRARY}
@@ -233,7 +233,7 @@ Please see http://bitbucket.org/rude/megasource
 		set(LOVE_LUA_LIBRARY ${LUAJIT_LIBRARY})
 		set(LOVE_LUA_INCLUDE_DIR ${LUAJIT_INCLUDE_DIR})
 	else()
-		find_package(Lua51 REQUIRED)
+		find_package(Lua52 REQUIRED)
 		set(LOVE_LUA_LIBRARY ${LUA_LIBRARY})
 		set(LOVE_LUA_INCLUDE_DIR ${LUA_INCLUDE_DIR})
 	endif()
@@ -1783,11 +1783,7 @@ endif()
 #
 if(EMSCRIPTEN)
     # add_definitions is for other libraries
-	if(LOVEJS_COMPAT)
-		add_definitions("-s USE_SDL=2 -s FULL_ES2=1 -s INVOKE_RUN=0 --post-js ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/EmscriptenPersistence.js")
-	else()
-		add_definitions("-s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=8 -s USE_SDL=2 -s FULL_ES2=1 -s INVOKE_RUN=0 --post-js ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/EmscriptenPersistence.js")
-	endif()
+	add_definitions("-s USE_SDL=2 -s FULL_ES2=1 -s INVOKE_RUN=0 --post-js ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/EmscriptenPersistence.js")
 
 	add_executable(${LOVE_EXE_NAME} src/love.cpp)	
 	set(EMSCRIPTEN_ARGS	
@@ -1798,9 +1794,13 @@ if(EMSCRIPTEN)
 		"-s EXPORT_NAME=\"'Love'\""	
 		"-s WASM=1"
 		"-s FULL_ES2=1"	
-		"-s DISABLE_EXCEPTION_CATCHING=0" # Might be worth building a whitelist for EXCEPTION_CATCHING_WHITELIST
+		"-fwasm-exceptions"
+		"-s WASM_LEGACY_EXCEPTIONS=0"
+		# "-s DISABLE_EXCEPTION_CATCHING=0" # Might be worth building a whitelist for EXCEPTION_CATCHING_WHITELIST
 		"-s ALLOW_MEMORY_GROWTH=1" # for dynamic resizing of memory, should not have a performance impact as using WASM
 		"-s FORCE_FILESYSTEM=1" # to fix Module.addDependency not existing
+		"-s EXPORTED_FUNCTIONS=_malloc,_main"
+		"-s EXPORTED_RUNTIME_METHODS=HEAPU8"
 		"-lidbfs.js" # to fix the ReferenceError: IDBFS is not defined
         "-lwebsocket.js" # websocket API
 	)
@@ -1808,11 +1808,11 @@ if(EMSCRIPTEN)
 	if(NOT LOVEJS_COMPAT)
 		set(EMSCRIPTEN_ARGS
 			${EMSCRIPTEN_ARGS}
-			"-s USE_PTHREADS=1"
+			"-pthread"
 			"-s PTHREAD_POOL_SIZE=8"	
 		)
 	endif()
-
+	
 	target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME} ${EMSCRIPTEN_ARGS})	
 else()
 	add_executable(${LOVE_EXE_NAME} WIN32 src/love.cpp ${LOVE_RC})
