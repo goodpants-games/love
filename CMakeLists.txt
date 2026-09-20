@@ -1799,7 +1799,7 @@ if(EMSCRIPTEN)
 		# "-s DISABLE_EXCEPTION_CATCHING=0" # Might be worth building a whitelist for EXCEPTION_CATCHING_WHITELIST
 		"-s ALLOW_MEMORY_GROWTH=1" # for dynamic resizing of memory, should not have a performance impact as using WASM
 		"-s FORCE_FILESYSTEM=1" # to fix Module.addDependency not existing
-		"-s EXPORTED_FUNCTIONS=_malloc,_main"
+		"-s EXPORTED_FUNCTIONS=_malloc,_main,AL"
 		"-s EXPORTED_RUNTIME_METHODS=HEAPU8"
 		"-lidbfs.js" # to fix the ReferenceError: IDBFS is not defined
         "-lwebsocket.js" # websocket API
