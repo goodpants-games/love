@@ -1812,13 +1812,11 @@ if(EMSCRIPTEN)
 	endif()
 
 	# write build commands to file for xlove usage
-	set(LOVE_BUILD_FLAGS "")
-	foreach(item ${EMSCRIPTEN_ARGS})
-		list(APPEND LOVE_BUILD_FLAGS "\"${item}\"")
-	endforeach()
-	list(APPEND LOVE_BUILD_FLAGS "--post-js post_js.js")
-	string(JOIN " " LOVE_BUILD_FLAGS ${LOVE_BUILD_FLAGS})
-	file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/buildflags.txt ${LOVE_BUILD_FLAGS})
+	string(JOIN "\n" LOVE_BUILD_FLAGS ${EMSCRIPTEN_ARGS})
+	file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/build_flags.txt ${LOVE_BUILD_FLAGS})
+
+	# write emsdk version
+	file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/emsdk_version.txt ${EMSCRIPTEN_VERSION})
 
 	# this build flag is not included for the user
 	set(EMSCRIPTEN_ARGS
