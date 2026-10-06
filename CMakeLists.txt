@@ -1785,13 +1785,11 @@ if(EMSCRIPTEN)
     # add_definitions is for other libraries
 	add_definitions("-s USE_SDL=2 -s FULL_ES2=1 -s INVOKE_RUN=0 --post-js ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/EmscriptenPersistence.js")
 
-	add_executable(${LOVE_EXE_NAME} src/love.cpp)	
 	set(EMSCRIPTEN_ARGS	
 		"-s CASE_INSENSITIVE_FS=1" # I think this is probably what most users expect (sorry linuxers)	
-		"--post-js ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/EmscriptenPersistence.js"	
 		"-s USE_SDL=2"
 		"-s MODULARIZE=1"	
-		"-s EXPORT_NAME=\"'Love'\""	
+		"-s EXPORT_NAME=Love"
 		"-s WASM=1"
 		"-s FULL_ES2=1"	
 		"-fwasm-exceptions"
@@ -1812,8 +1810,36 @@ if(EMSCRIPTEN)
 			"-s PTHREAD_POOL_SIZE=8"	
 		)
 	endif()
+
+	# write build commands to file for xlove usage
+	set(LOVE_BUILD_FLAGS "")
+	foreach(item ${EMSCRIPTEN_ARGS})
+		list(APPEND LOVE_BUILD_FLAGS "\"${item}\"")
+	endforeach()
+	list(APPEND LOVE_BUILD_FLAGS "--post-js post_js.js")
+	string(JOIN " " LOVE_BUILD_FLAGS ${LOVE_BUILD_FLAGS})
+	file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/buildflags.txt ${LOVE_BUILD_FLAGS})
+
+	# this build flag is not included for the user
+	set(EMSCRIPTEN_ARGS
+		${EMSCRIPTEN_ARGS}
+		"--post-js ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/EmscriptenPersistence.js")
 	
-	target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME} ${EMSCRIPTEN_ARGS})	
+	# main love module
+	add_executable(${LOVE_EXE_NAME} src/love.cpp)
+	target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME} ${EMSCRIPTEN_ARGS})
+
+	# build xlove: a version of love as a static library which calls a declared
+	# but undefined function named "luaopen_lovex". it is up to the user to link
+	# this with their module which implements that function.
+	set(XLOVE_AR_NAME x${LOVE_EXE_NAME})
+	set(XLOVE_LIB_NAME lib${XLOVE_AR_NAME})
+	add_library(${XLOVE_LIB_NAME} STATIC src/love.cpp)
+	target_compile_definitions(${XLOVE_LIB_NAME} PRIVATE LOVEJS_LOVEX)
+	target_link_libraries(${XLOVE_LIB_NAME} ${LOVE_LIB_NAME} ${EMSCRIPTEN_ARGS})
+
+	include(combiner.cmake)
+	combine_static_libraries(${XLOVE_LIB_NAME} ${XLOVE_AR_NAME})
 else()
 	add_executable(${LOVE_EXE_NAME} WIN32 src/love.cpp ${LOVE_RC})
 	target_link_libraries(${LOVE_EXE_NAME} ${LOVE_LIB_NAME})

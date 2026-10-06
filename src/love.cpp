@@ -32,6 +32,12 @@ extern "C" {
 	#include <lauxlib.h>
 }
 
+#ifdef LOVEJS_LOVEX
+extern "C" {
+	extern int luaopen_lovex(lua_State *L);
+}
+#endif
+
 #ifdef LOVE_WINDOWS
 #include <windows.h>
 #endif // LOVE_WINDOWS
@@ -180,6 +186,9 @@ static DoneAction runlove(int argc, char **argv, int &retval)
 
 	// Add love to package.preload for easy requiring.
 	love_preload(L, luaopen_love, "love");
+#ifdef LOVEJS_LOVEX
+	love_preload(L, luaopen_lovex, "lovex");
+#endif
 
 	// Add command line arguments to global arg (like stand-alone Lua).
 	{
