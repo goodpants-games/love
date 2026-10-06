@@ -75,9 +75,11 @@ static bool has_ext(const char *ext) {
 #ifdef __EMSCRIPTEN__
 #define HAS_EXT(ext) has_ext(ext)
 #define HAS_EXT_WEBGL(gles_ext, webgl_ext) HAS_EXT(webgl_ext)
+#define HAS_EXT_WEBGL_BOOL(gles_ext, webgl_support) webgl_support
 #else
 #define HAS_EXT(ext) has_ext("GL_" ext)
 #define HAS_EXT_WEBGL(gles_ext, webgl_ext) HAS_EXT(gles_ext)
+#define HAS_EXT_WEBGL_BOOL(gles_ext, webgl_support) HAS_EXT(gles_ext)
 #endif
 
 pfn_glCopyTexImage1D fp_glCopyTexImage1D;
@@ -7022,7 +7024,7 @@ static void find_extensions(void) {
 	GLAD_OES_packed_depth_stencil = HAS_EXT("OES_packed_depth_stencil");
 	GLAD_OES_primitive_bounding_box = HAS_EXT("OES_primitive_bounding_box");
 	GLAD_OES_required_internalformat = HAS_EXT("OES_required_internalformat");
-	GLAD_OES_rgb8_rgba8 = HAS_EXT("OES_rgb8_rgba8");
+	GLAD_OES_rgb8_rgba8 = HAS_EXT_WEBGL_BOOL("OES_rgb8_rgba8", true);
 	GLAD_OES_sample_shading = HAS_EXT("OES_sample_shading");
 	GLAD_OES_sample_variables = HAS_EXT("OES_sample_variables");
 	GLAD_OES_shader_image_atomic = HAS_EXT("OES_shader_image_atomic");
