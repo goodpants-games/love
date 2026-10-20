@@ -32,7 +32,9 @@ set(LOVE_LIB_NAME liblove)
 
 set(CMAKE_MODULE_PATH "${love_SOURCE_DIR}/extra/cmake" ${CMAKE_MODULE_PATH})
 # Needed for shared libs on Linux. (-fPIC).
-set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+if (NOT EMSCRIPTEN)
+	set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+endif()
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -1766,7 +1768,12 @@ if(MSVC)
 	)
 endif()
 
-add_library(${LOVE_LIB_NAME} SHARED ${LOVE_LIB_SRC} ${LOVE_RC})
+if (EMSCRIPTEN)
+	add_library(${LOVE_LIB_NAME} STATIC ${LOVE_LIB_SRC} ${LOVE_RC})
+else()
+	add_library(${LOVE_LIB_NAME} SHARED ${LOVE_LIB_SRC} ${LOVE_RC})
+endif()
+
 target_link_libraries(${LOVE_LIB_NAME} ${LOVE_LINK_LIBRARIES} ${LOVE_3P})
 
 if(LOVE_EXTRA_DEPENDECIES)
@@ -1782,8 +1789,7 @@ endif()
 # love (executable)
 #
 if(EMSCRIPTEN)
-    # add_definitions is for other libraries
-	add_definitions("-s USE_SDL=2 -s FULL_ES2=1 -s INVOKE_RUN=0 --post-js ${CMAKE_CURRENT_SOURCE_DIR}/src/scripts/EmscriptenPersistence.js")
+	add_definitions("-s USE_SDL=2")
 
 	add_executable(${LOVE_EXE_NAME} src/love.cpp)	
 	set(EMSCRIPTEN_ARGS	
