@@ -131,7 +131,8 @@ void Event::pump()
 		}
 	}
 
-	Module::getInstance<love::audio::openal::Audio>(Module::M_AUDIO)->pool->update();
+	if (auto audio = Module::getInstance<audio::openal::Audio>(Module::M_AUDIO))
+		audio->pool->update();
 }
 
 Message *Event::wait()
